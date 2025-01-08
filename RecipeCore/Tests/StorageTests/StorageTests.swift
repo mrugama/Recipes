@@ -23,11 +23,11 @@ class ConcreteStorageTests: XCTestCase {
         try super.tearDownWithError()
     }
     
-    func testSaveImageData() throws {
+    func testSaveImageData() async throws {
         let imageID = "testImage"
         let testData = "TestImageData".data(using: .utf8)!
         
-        try storage.save(imageID, data: testData)
+        try await storage.save(imageID, data: testData)
         
         let savedFilePath = testDirectory.appendingPathComponent(imageID)
         XCTAssertTrue(FileManager.default.fileExists(atPath: savedFilePath.path), "File should exist at the path")
@@ -36,20 +36,20 @@ class ConcreteStorageTests: XCTestCase {
         XCTAssertEqual(retrievedData, testData, "Saved data should match the input data")
     }
     
-    func testGetImageData() throws {
+    func testGetImageData() async throws {
         let imageID = "testImage"
         let testData = "TestImageData".data(using: .utf8)!
         
         let filePath = testDirectory.appendingPathComponent(imageID)
         try testData.write(to: filePath)
         
-        let retrievedData = try storage.getImageData(imageID)
+        let retrievedData = try await storage.getImageData(imageID)
         XCTAssertNotNil(retrievedData, "Retrieved data should not be nil")
         XCTAssertEqual(retrievedData, testData, "Retrieved data should match the saved data")
     }
     
     // MARK: - Test clearCachedDirectory() Method
-    func testClearCachedDirectory() throws {
+    func testClearCachedDirectory() async throws {
         let imageID1 = "testImage1"
         let imageID2 = "testImage2"
         let testData = "TestImageData".data(using: .utf8)!
@@ -65,7 +65,7 @@ class ConcreteStorageTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: filePath2.path), "File 2 should exist before clearing")
         
         // Clear the cached directory
-        try storage.clearCachedDirectory()
+        try await storage.clearCachedDirectory()
         
         // Verify the directory no longer exists
         XCTAssertFalse(FileManager.default.fileExists(atPath: testDirectory.path), "Directory should be deleted")

@@ -25,23 +25,35 @@ final class MockDataLoader: DataLoader {
 
 extension MockDataLoader: @unchecked Sendable {}
 
-final class MockStorage: Storage {
+actor MockStorage: Storage {
     var mockStorage: [String: Data]
     
     init() {
         self.mockStorage = [:]
     }
 
-    func save(_ imageID: String, data: Data) throws {
+    func save(_ imageID: String, data: Data) async throws {
         mockStorage[imageID] = data
     }
     
-    func getImageData(_ imageID: String) throws -> Data? {
+    func getImageData(_ imageID: String) async throws -> Data? {
         return mockStorage[imageID]
     }
     
-    func clearCachedDirectory() throws {
+    func clearCachedDirectory() async throws {
         // Fake clear cache
+    }
+    
+    func getHash(from data: Data) async throws -> String {
+        ""
+    }
+    
+    func getLocalHash() async -> String? {
+        ""
+    }
+    
+    func shouldFetchOnline(remoteHash: String) async -> Bool {
+        false
     }
 }
 
@@ -124,7 +136,7 @@ final class RecipeRestAPITests: XCTestCase {
         let imageData = "TestImageData".data(using: .utf8)!
 
         // When
-        try mockStorage.save(imageURL, data: imageData)
+        try await mockStorage.save(imageURL, data: imageData)
         let fetchedData = try await api.fetchImage(with: imageURL)
 
         // Then
@@ -148,7 +160,7 @@ final class RecipeRestAPITests: XCTestCase {
 }
 
 // MARK: - Mock Service Providers
-class MockDataLoaderService: DataLoaderService {
+final class MockDataLoaderService: DataLoaderService {
     private let mockDataLoader: MockDataLoader
     
     init(_ mockDataLoader: MockDataLoader) {
@@ -160,7 +172,7 @@ class MockDataLoaderService: DataLoaderService {
     }
 }
 
-class MockStorageService: StorageService {
+final class MockStorageService: StorageService {
     private let mockStorage: MockStorage
     
     init(_ mockStorage: MockStorage) {
