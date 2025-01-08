@@ -2,43 +2,30 @@ import Foundation
 import Networking
 import Storage
 
-public struct Recipe: Decodable, Hashable, Sendable {
-    public let cuisine: String
-    public let name: String
-    public let photoUrlLarge: String?
-    public let photoUrlSmall: String?
-    public let sourceUrl: String?
-    public let uuid: String
-    public let youtubeUrl: String?
-    public var imageData: Data? 
-    
-    public init(
-        cuisine: String,
-        name: String,
-        photoUrlLarge: String?,
-        photoUrlSmall: String?,
-        sourceUrl: String?,
-        uuid: String,
-        youtubeUrl: String?
-    ) {
-        self.cuisine = cuisine
-        self.name = name
-        self.photoUrlLarge = photoUrlLarge
-        self.photoUrlSmall = photoUrlSmall
-        self.sourceUrl = sourceUrl
-        self.uuid = uuid
-        self.youtubeUrl = youtubeUrl
-    }
+public protocol RecipeModel
+where Self: Decodable,
+      Self: Hashable,
+      Self: Sendable {
+    var cuisine: String { get }
+    var name: String { get }
+    var photoUrlLarge: String? { get }
+    var photoUrlSmall: String? { get }
+    var sourceUrl: String? { get }
+    var uuid: String { get }
+    var youtubeUrl: String? { get }
+    var imageData: Data? { get }
 }
 
-public enum RecipeEndpoint: String, CaseIterable {
+public enum RecipeEndpoint: String, CaseIterable, Sendable {
     case valid, malformed, empty
 }
 
-public protocol RecipeRestAPI where Self: Sendable {
-    func fetchRecipes(_ endpoint: RecipeEndpoint) async throws -> [Recipe]
+public protocol RecipeRestAPI
+where Self: Sendable,
+      Self: Actor {
+    func fetchRecipes(_ endpoint: RecipeEndpoint) async throws -> [any RecipeModel]
     func fetchImage(with urlStr: String) async throws -> Data?
-    func clearCache() throws
+    func clearCache() async throws
 }
 
 public protocol RecipeRestAPIService {

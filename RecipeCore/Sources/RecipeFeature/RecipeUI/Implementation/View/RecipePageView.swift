@@ -26,8 +26,11 @@ struct RecipePageView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            StatusView(message: viewModel.status)
+        }
         .task {
-            viewModel.loadRecipes(.empty)
+            viewModel.loadRecipes(.valid)
         }
         .refreshable {
             viewModel.loadRecipes(.valid)

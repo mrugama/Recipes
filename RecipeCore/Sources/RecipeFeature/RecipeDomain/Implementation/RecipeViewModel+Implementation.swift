@@ -5,9 +5,9 @@ import SwiftUI
 @MainActor
 @Observable
 final class ConcreteRecipeViewModel: RecipeViewModel {
-    private(set) var allRecipes: [Recipe] = []
+    private(set) var allRecipes: [any RecipeModel] = []
     var cacheImages: [String: Data] = [:]
-    var cusines: [String : [Recipe]] {
+    var cusines: [String : [any RecipeModel]] {
         Dictionary(
             grouping: allRecipes,
             by: { $0.cuisine }
@@ -15,6 +15,8 @@ final class ConcreteRecipeViewModel: RecipeViewModel {
     }
     private(set) var output: String?
     private(set) var recipeRestAPI: RecipeRestAPI
+    var status: String?
+    var shouldShowStatus: Bool = true
     
     init(recipeRestAPIService: RecipeRestAPIService) {
         recipeRestAPI = recipeRestAPIService.provideRecipeRestAPI()
@@ -22,14 +24,16 @@ final class ConcreteRecipeViewModel: RecipeViewModel {
     
     func loadRecipes(_ endpoint: RecipeEndpoint = .valid) {
         output = "Fetching recipes..."
+        shouldShowStatus = true
         Task {
             do {
                 let recipes = try await recipeRestAPI.fetchRecipes(endpoint)
                 if recipes.isEmpty {
                     output = "No recipes found."
+                    status = "Upda to date. No data found"
                 } else {
                     output = nil
-                    
+                    status = "Up to date. \(recipes.count) recipes found"
                     allRecipes = recipes
                 }
             } catch {
@@ -44,6 +48,8 @@ final class ConcreteRecipeViewModel: RecipeViewModel {
     }
     
     func clearCache() {
-        try? recipeRestAPI.clearCache()
+        Task {
+            try? await recipeRestAPI.clearCache()            
+        }
     }
 }

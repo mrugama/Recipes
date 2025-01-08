@@ -4,7 +4,7 @@ public protocol DataLoader where Self: Sendable {
     func load(urlStr: String) async throws -> Data
 }
 
-public protocol DataLoaderService {
+public protocol DataLoaderService where Self: Sendable {
     func provideDataLoader() -> any DataLoader
 }
 

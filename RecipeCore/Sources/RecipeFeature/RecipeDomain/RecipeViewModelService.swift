@@ -3,10 +3,12 @@ import RecipeRestAPI
 
 @MainActor
 public protocol RecipeViewModel where Self: Observable {
-    var allRecipes: [Recipe] { get }
+    var allRecipes: [any RecipeModel] { get }
     var cacheImages: [String: Data] { get }
-    var cusines: [String: [Recipe]] { get }
+    var cusines: [String: [any RecipeModel]] { get }
     var output: String? { get }
+    var status: String? { get set }
+    var shouldShowStatus: Bool { get set }
     
     func loadRecipes(_ endpoint: RecipeEndpoint)
     func getImageData(_ imageUrl: String) async
