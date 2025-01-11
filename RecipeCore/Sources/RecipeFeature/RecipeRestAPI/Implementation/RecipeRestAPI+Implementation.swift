@@ -2,25 +2,15 @@ import Foundation
 import Networking
 import Storage
 
-struct Recipe: RecipeModel {
-    let cuisine: String
-    let name: String
-    let photoUrlLarge: String?
-    let photoUrlSmall: String?
-    let sourceUrl: String?
-    let uuid: String
-    let youtubeUrl: String?
-    var imageData: Data?
-}
-
-struct Model: Decodable {
+struct Model: Decodable, Sendable {
     let recipes: [Recipe]
 }
 
 actor ConcreteRecipeRestAPI: RecipeRestAPI {
     private let dataLoader: any DataLoader
     private let storage: any Storage
-    private var recipes: [any RecipeModel] = []
+    private var recipes: [Recipe] = []
+    var shouldOverrideRecipe: Bool = false
     
     init(
         dataLoaderService: DataLoaderService,
@@ -30,12 +20,12 @@ actor ConcreteRecipeRestAPI: RecipeRestAPI {
         self.storage = storageService.provideStorage()
     }
     
-    func fetchRecipes(_ endpoint: RecipeEndpoint) async throws -> [any RecipeModel] {
+    func fetchRecipes(_ endpoint: RecipeEndpoint) async throws -> [Recipe] {
         let dataResponse = try await dataLoader.load(urlStr: endpoint.urlStr)
         let shouldOverride = try await shouldOverride(dataResponse)
         if shouldOverride || recipes.isEmpty {
+            shouldOverrideRecipe = true
             let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
             async let model = try decoder.decode(Model.self, from: dataResponse)
             recipes = try await model.recipes
         }

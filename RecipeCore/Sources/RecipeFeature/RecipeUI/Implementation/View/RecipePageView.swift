@@ -1,8 +1,19 @@
 import RecipeDomain
+import RecipeRestAPI
 import SwiftUI
+import SwiftData
 
 struct RecipePageView: View {
     @State private var viewModel: RecipeViewModel
+    @Environment(\.modelContext) private var modelContext
+    @Query var recipes: [Recipe]
+    
+    var cusines: [String : [Recipe]] {
+        Dictionary(
+            grouping: recipes,
+            by: { $0.cuisine }
+        )
+    }
     
     init(service: RecipeViewModelService) {
         self.viewModel = service.provideViewModel()
@@ -13,9 +24,9 @@ struct RecipePageView: View {
             if let output = viewModel.output {
                 OutputView(message: LocalizedStringKey(output))
             } else {
-                ForEach(Array(viewModel.cusines.keys), id: \.self) { key in
+                ForEach(Array(cusines.keys), id: \.self) { key in
                     Section(header: Text(key).font(.headline)) {
-                        ForEach(Array(viewModel.cusines[key]!), id: \.uuid) { recipe in
+                        ForEach(Array(cusines[key]!), id: \.uuid) { recipe in
                             let image = getImage(from: viewModel.cacheImages[recipe.photoUrlSmall!])
                             return RecipeRowView(imageView: image, title: recipe.name)
                                 .task {
@@ -30,10 +41,19 @@ struct RecipePageView: View {
             StatusView(message: viewModel.status)
         }
         .task {
-            viewModel.loadRecipes(.valid)
+            await viewModel.loadRecipes(.valid)
+        }
+        .task(id: viewModel.shouldOverrideRecipes) {
+            if viewModel.shouldOverrideRecipes {
+                try? modelContext.delete(model: Recipe.self)
+                viewModel.allRecipes.forEach { recipe in
+                    modelContext.insert(recipe)
+                    viewModel.shouldOverrideRecipes = false
+                }
+            }
         }
         .refreshable {
-            viewModel.loadRecipes(.valid)
+            await viewModel.loadRecipes(.valid)
         }
         .listStyle(.grouped)
     }

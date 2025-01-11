@@ -5,29 +5,25 @@ import SwiftUI
 @MainActor
 @Observable
 final class ConcreteRecipeViewModel: RecipeViewModel {
-    private(set) var allRecipes: [any RecipeModel] = []
+    private(set) var allRecipes: [Recipe] = []
     var cacheImages: [String: Data] = [:]
-    var cusines: [String : [any RecipeModel]] {
-        Dictionary(
-            grouping: allRecipes,
-            by: { $0.cuisine }
-        )
-    }
     private(set) var output: String?
     private(set) var recipeRestAPI: RecipeRestAPI
     var status: String?
     var shouldShowStatus: Bool = true
+    var shouldOverrideRecipes: Bool = false
     
     init(recipeRestAPIService: RecipeRestAPIService) {
         recipeRestAPI = recipeRestAPIService.provideRecipeRestAPI()
     }
     
-    func loadRecipes(_ endpoint: RecipeEndpoint = .valid) {
+    func loadRecipes(_ endpoint: RecipeEndpoint = .valid) async {
         output = "Fetching recipes..."
         shouldShowStatus = true
         Task {
             do {
                 let recipes = try await recipeRestAPI.fetchRecipes(endpoint)
+                shouldOverrideRecipes = await recipeRestAPI.shouldOverrideRecipe
                 if recipes.isEmpty {
                     output = "No recipes found."
                     status = "Upda to date. No data found"
