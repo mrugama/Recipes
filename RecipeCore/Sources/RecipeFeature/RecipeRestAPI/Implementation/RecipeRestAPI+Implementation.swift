@@ -24,10 +24,10 @@ actor ConcreteRecipeRestAPI: RecipeRestAPI {
         let dataResponse = try await dataLoader.load(urlStr: endpoint.urlStr)
         let shouldOverride = try await shouldOverride(dataResponse)
         if shouldOverride || recipes.isEmpty {
-            shouldOverrideRecipe = true
             let decoder = JSONDecoder()
             async let model = try decoder.decode(Model.self, from: dataResponse)
             recipes = try await model.recipes
+            shouldOverrideRecipe = true
         }
         return recipes
     }

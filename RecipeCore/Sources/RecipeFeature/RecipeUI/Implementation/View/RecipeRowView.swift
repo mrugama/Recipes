@@ -12,5 +12,6 @@ struct RecipeRowView: View {
                 .resizable()
                 .frame(width: .x64, height: .x64)
         }
+        .padding()
     }
 }

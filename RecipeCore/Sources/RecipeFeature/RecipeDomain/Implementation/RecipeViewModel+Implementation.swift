@@ -19,18 +19,18 @@ final class ConcreteRecipeViewModel: RecipeViewModel {
     
     func loadRecipes(_ endpoint: RecipeEndpoint = .valid) async {
         output = "Fetching recipes..."
-        shouldShowStatus = true
         Task {
             do {
                 let recipes = try await recipeRestAPI.fetchRecipes(endpoint)
-                shouldOverrideRecipes = await recipeRestAPI.shouldOverrideRecipe
                 if recipes.isEmpty {
                     output = "No recipes found."
-                    status = "Upda to date. No data found"
+                    status = "Up to date. No data found"
                 } else {
                     output = nil
                     status = "Up to date. \(recipes.count) recipes found"
                     allRecipes = recipes
+                    shouldOverrideRecipes = await recipeRestAPI.shouldOverrideRecipe
+                    shouldShowStatus = true
                 }
             } catch {
                 output = error.localizedDescription

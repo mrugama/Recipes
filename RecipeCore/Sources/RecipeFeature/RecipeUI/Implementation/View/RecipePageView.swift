@@ -38,7 +38,7 @@ struct RecipePageView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            StatusView(message: viewModel.status)
+            StatusView(message: viewModel.status, show: $viewModel.shouldShowStatus)
         }
         .task {
             await viewModel.loadRecipes(.valid)
