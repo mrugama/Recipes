@@ -50,6 +50,7 @@ struct RecipePageView: View {
                     modelContext.insert(recipe)
                     viewModel.shouldOverrideRecipes = false
                 }
+                try? modelContext.save()
             }
         }
         .refreshable {
