@@ -2,7 +2,7 @@ import SwiftUI
 
 struct OutputView: View {
     var message: LocalizedStringKey
-    var action: () -> Void = { }
+    var action: () async -> Void = { }
     var body: some View {
         ContentUnavailableView {
             Image(systemName: "house.slash")
@@ -13,7 +13,9 @@ struct OutputView: View {
                 .padding()
         } actions: {
             Button(LocalizedStringKey("Retry")) {
-                action()
+                Task {
+                    await action()
+                }
             }
         }
     }

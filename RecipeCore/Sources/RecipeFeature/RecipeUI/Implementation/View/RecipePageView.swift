@@ -23,9 +23,7 @@ struct RecipePageView: View {
         List {
             if let output = viewModel.output {
                 OutputView(message: LocalizedStringKey(output)) {
-                    Task {
-                        await viewModel.loadRecipes(.valid)
-                    }
+                    await viewModel.loadRecipes(.valid)
                 }
             } else {
                 ForEach(Array(cusines.keys), id: \.self) { key in
