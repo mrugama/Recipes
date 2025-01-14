@@ -22,7 +22,11 @@ struct RecipePageView: View {
     var body: some View {
         List {
             if let output = viewModel.output {
-                OutputView(message: LocalizedStringKey(output))
+                OutputView(message: LocalizedStringKey(output)) {
+                    Task {
+                        await viewModel.loadRecipes(.valid)
+                    }
+                }
             } else {
                 ForEach(Array(cusines.keys), id: \.self) { key in
                     Section(header: Text(key).font(.headline)) {

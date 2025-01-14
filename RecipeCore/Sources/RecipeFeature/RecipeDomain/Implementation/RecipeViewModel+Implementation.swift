@@ -10,7 +10,7 @@ final class ConcreteRecipeViewModel: RecipeViewModel {
     private(set) var output: String?
     private(set) var recipeRestAPI: RecipeRestAPI
     var status: String?
-    var shouldShowStatus: Bool = true
+    var shouldShowStatus: Bool = false
     var shouldOverrideRecipes: Bool = false
     
     init(recipeRestAPIService: RecipeRestAPIService) {
@@ -34,6 +34,7 @@ final class ConcreteRecipeViewModel: RecipeViewModel {
                 }
             } catch {
                 output = error.localizedDescription
+                shouldShowStatus = false
             }
         }
     }
